@@ -78,6 +78,78 @@
     .meta-divider { width: 1px; height: 32px; background: var(--line); }
     .target-line { display: none; text-align: center; padding: 10px 14px; background: rgba(185,243,107,.07); border-top: 1px solid rgba(185,243,107,.11); color: #d9e7dc; font-size: 12px; }
     .target-line strong { color: var(--green); }
+
+    /* No-ball selection popup */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      background: rgba(0, 0, 0, .72);
+      backdrop-filter: blur(5px);
+    }
+    .no-ball-dialog {
+      width: 100%;
+      max-width: 370px;
+      padding: 23px;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: linear-gradient(155deg, #1b3829, #102219);
+      box-shadow: 0 25px 90px rgba(0,0,0,.48);
+    }
+    .no-ball-dialog h2 { font-size: 23px; margin: 8px 0; }
+    .no-ball-help { color: var(--muted); font-size: 12px; line-height: 1.5; margin: 0 0 17px; }
+    .no-ball-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+    .no-ball-option {
+      min-height: 59px;
+      border: 1px solid rgba(255,180,84,.24);
+      border-radius: 12px;
+      background: rgba(255,180,84,.08);
+      color: var(--orange);
+      font-weight: 900;
+      font-size: 14px;
+    }
+    .no-ball-option small { display: block; margin-top: 4px; color: var(--muted); font-size: 9px; font-weight: 650; }
+    .no-ball-option:last-child:nth-child(odd) { grid-column: 1 / -1; }
+    .no-ball-option:active { transform: scale(.98); }
+    .cancel-no-ball {
+      width: 100%;
+      margin-top: 11px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: rgba(255,255,255,.035);
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .ball-history {
+      padding: 13px 17px 14px;
+      border-top: 1px solid rgba(255,255,255,.06);
+      border-bottom: 1px solid rgba(255,255,255,.06);
+      background: rgba(0,0,0,.08);
+    }
+    .ball-history-title {
+      color: var(--muted); font-size: 10px; font-weight: 850;
+      letter-spacing: .14em; text-transform: uppercase; margin: 0 0 10px 2px;
+    }
+    .ball-history-content { display: grid; gap: 9px; max-height: 180px; overflow-y: auto; }
+    .over-row { display: grid; grid-template-columns: 48px minmax(0, 1fr); align-items: start; gap: 8px; }
+    .over-label { color: #82988a; font-size: 10px; font-weight: 800; padding-top: 7px; }
+    .ball-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+    .ball-chip {
+      display: inline-flex; align-items: center; justify-content: center; min-width: 28px; height: 27px;
+      padding: 0 7px; border: 1px solid rgba(255,255,255,.1); border-radius: 8px;
+      color: #e7f0e9; background: rgba(255,255,255,.055); font-size: 11px; font-weight: 850;
+    }
+    .ball-chip.dot { color: #b7c6bb; }
+    .ball-chip.boundary { color: var(--green); border-color: rgba(185,243,107,.18); background: rgba(185,243,107,.07); }
+    .ball-chip.wicket { color: #ff9a9a; border-color: rgba(255,119,119,.23); background: rgba(255,119,119,.08); }
+    .ball-chip.extra { color: var(--orange); border-color: rgba(255,180,84,.23); background: rgba(255,180,84,.07); }
+    .ball-history-empty { color: #82988a; font-size: 11px; padding: 2px; }
     .state-banner { display: none; margin: 0 18px 16px; border-radius: 12px; padding: 12px; text-align: center; background: rgba(255,180,84,.1); border: 1px solid rgba(255,180,84,.25); color: #ffd8a6; font-size: 12px; font-weight: 800; line-height: 1.4; }
     .controls { padding: 0 17px 18px; }
     .section-label { color: var(--muted); font-size: 10px; font-weight: 850; letter-spacing: .14em; text-transform: uppercase; margin: 0 0 10px 3px; }
@@ -92,7 +164,7 @@
     .score-btn.extra { color: var(--orange); background: rgba(255,180,84,.08); border-color: rgba(255,180,84,.24); font-size: 12px; }
     .score-btn:disabled { opacity: .32; cursor: not-allowed; transform: none; }
     .extra-note { color: #84988b; font-size: 10px; line-height: 1.4; margin: 9px 2px 0; }
-    .utility-row { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 15px; }
+    .utility-row { display: grid; grid-template-columns: 1fr; gap: 9px; margin-top: 15px; }
     .utility { border: 1px solid var(--line); color: #d8e4db; border-radius: 11px; padding: 11px 9px; font-size: 11px; font-weight: 800; background: rgba(255,255,255,.025); }
     .utility:disabled { opacity: .35; cursor: not-allowed; }
     .next-actions { display: none; padding: 0 18px 19px; }
@@ -168,6 +240,12 @@
         </div>
       </div>
       <div class="target-line" id="targetLine"></div>
+      <section class="ball-history" id="ballHistory" aria-label="Ball-by-ball history">
+        <div class="ball-history-title">BALL-BY-BALL HISTORY</div>
+        <div class="ball-history-content" id="ballHistoryContent" aria-live="polite">
+          <div class="ball-history-empty">Ball results will appear here as you score.</div>
+        </div>
+      </section>
       <div class="state-banner" id="stateBanner"></div>
 
       <div class="controls" id="scoringControls">
@@ -188,20 +266,42 @@
         </div>
         <p class="extra-note">For extra running runs on a wide or no-ball, tap “+1 Extra Run” once per run. It does not use up a ball.</p>
         <div class="utility-row">
-          <button class="utility" id="undoBtn">↶ &nbsp; Undo last action</button>
           <button class="utility" id="endInningsBtn">End innings</button>
         </div>
       </div>
       <div class="next-actions" id="nextActions">
         <button class="primary" id="nextBtn">START 2ND INNINGS&nbsp; →</button>
+        <button class="secondary" id="completedUndoBtn">↶ &nbsp; Undo last action</button>
         <button class="secondary" id="newMatchBtn">Start a new match</button>
       </div>
     </section>
+
+    <!-- Appears only when the No-ball button is tapped -->
+    <div class="modal-backdrop" id="noBallModal" hidden>
+      <section class="no-ball-dialog" role="dialog" aria-modal="true" aria-labelledby="noBallTitle" aria-describedby="noBallHelp">
+        <div class="eyebrow">Extra delivery</div>
+        <h2 id="noBallTitle">No-ball runs</h2>
+        <p class="no-ball-help" id="noBallHelp">
+          A no-ball adds 1 penalty run. Choose the additional runs scored off this delivery.
+        </p>
+        <div class="no-ball-options">
+          <button type="button" class="no-ball-option" data-no-ball-runs="0">NB + 0<small>Total: +1 run</small></button>
+          <button type="button" class="no-ball-option" data-no-ball-runs="1">NB + 1<small>Total: +2 runs</small></button>
+          <button type="button" class="no-ball-option" data-no-ball-runs="2">NB + 2<small>Total: +3 runs</small></button>
+          <button type="button" class="no-ball-option" data-no-ball-runs="3">NB + 3<small>Total: +4 runs</small></button>
+          <button type="button" class="no-ball-option" data-no-ball-runs="4">NB + 4<small>Total: +5 runs</small></button>
+        </div>
+        <button type="button" class="cancel-no-ball" id="cancelNoBall">Cancel</button>
+      </section>
+    </div>
+
     <p class="footnote">Your score is saved on this device automatically.</p>
   </main>
 
   <script>
     (() => {
+      "use strict";
+
       const STORAGE_KEY = 'quickCricketScore_v1';
       const $ = (id) => document.getElementById(id);
       let selectedOvers = 6;
@@ -210,15 +310,29 @@
       function loadState() {
         try {
           const saved = localStorage.getItem(STORAGE_KEY);
-          return saved ? JSON.parse(saved) : null;
-        } catch (_) { return null; }
+          if (!saved) return null;
+          const loaded = JSON.parse(saved);
+          if (!loaded || typeof loaded !== 'object') return null;
+          if (!Array.isArray(loaded.history)) loaded.history = [];
+          if (!Array.isArray(loaded.deliveries)) loaded.deliveries = [];
+          // Older saved states did not store delivery history. Keep them usable.
+          loaded.history = loaded.history.map((entry) => ({
+            ...entry,
+            deliveries: Array.isArray(entry.deliveries) ? entry.deliveries : []
+          }));
+          return loaded;
+        } catch (_) {
+          return null;
+        }
       }
 
       function saveState() {
         try {
           if (state) localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
           else localStorage.removeItem(STORAGE_KEY);
-        } catch (_) { /* The app still works if browser storage is unavailable. */ }
+        } catch (_) {
+          // Scoring still works when browser storage is unavailable.
+        }
       }
 
       function snapshot() {
@@ -243,6 +357,7 @@
           inningsEnded: false,
           matchEnded: false,
           resultText: '',
+          deliveries: [],
           history: []
         };
         saveState();
@@ -256,12 +371,11 @@
       function finishSecondInnings() {
         state.matchEnded = true;
         state.inningsEnded = true;
+
         if (state.runs >= state.target) {
           state.resultText = 'TARGET REACHED';
         } else if (state.runs === state.firstInningsRuns) {
           state.resultText = 'MATCH TIED';
-        } else if (state.runs > state.firstInningsRuns) {
-          state.resultText = 'SECOND INNINGS WINS';
         } else {
           state.resultText = 'FIRST INNINGS WINS';
         }
@@ -272,28 +386,53 @@
           finishSecondInnings();
           return;
         }
+
         if (state.balls >= state.oversLimit * 6 || state.wickets >= 10) {
           state.inningsEnded = true;
           if (state.innings === 2) finishSecondInnings();
         }
       }
 
+      function addDelivery(label, description, kind = 'normal', overNumber = Math.floor(state.balls / 6) + 1) {
+        if (!Array.isArray(state.deliveries)) state.deliveries = [];
+        // The over number is captured before scoring, so ball 6 stays in over 1.
+        state.deliveries.push({ over: overNumber, label, description, kind });
+      }
+
       function applyAction(action, value = 0) {
         if (!state || state.inningsEnded || state.matchEnded) return;
         if (action === 'undo') return undo();
         if (action === 'wicket' && state.wickets >= 10) return;
-        pushHistory();
 
-        if (action === 'dot') state.balls += 1;
-        if (action === 'run') {
+        pushHistory();
+        const deliveryOver = Math.floor(state.balls / 6) + 1;
+
+        if (action === 'dot') {
+          state.balls += 1;
+          addDelivery('0', 'Dot ball', 'dot', deliveryOver);
+        } else if (action === 'run') {
           state.runs += value;
           state.balls += 1;
-        }
-        if (action === 'wicket') {
+          const kind = value === 4 || value === 6 ? 'boundary' : 'normal';
+          addDelivery(String(value), `${value} run${value === 1 ? '' : 's'}`, kind, deliveryOver);
+        } else if (action === 'wicket') {
           state.wickets += 1;
           state.balls += 1;
+          addDelivery('W', 'Wicket', 'wicket', deliveryOver);
+        } else if (action === 'wide') {
+          state.runs += 1;
+          addDelivery('WD', 'Wide +1', 'extra', deliveryOver);
+        } else if (action === 'noball') {
+          // Every no-ball adds the 1-run penalty plus selected batter runs.
+          // The legal-ball count is intentionally unchanged.
+          state.runs += 1 + value;
+          const label = `NB+${value}`;
+          const extraText = value === 1 ? '1 additional run' : `${value} additional runs`;
+          addDelivery(label, `No-ball: 1 penalty run + ${extraText}`, 'extra', deliveryOver);
+        } else if (action === 'extra') {
+          state.runs += 1;
+          addDelivery('+1', 'Extra run +1', 'extra', deliveryOver);
         }
-        if (action === 'wide' || action === 'noball' || action === 'extra') state.runs += 1;
 
         checkInningsEnd();
         saveState();
@@ -301,16 +440,20 @@
       }
 
       function undo() {
-        if (!state || !state.history.length) return;
+        if (!state || !Array.isArray(state.history) || !state.history.length) return;
+
         const history = state.history;
         const previous = history.pop();
         state = { ...previous, history };
+
+        // Make sure older saved snapshots still work with the history display.
+        if (!Array.isArray(state.deliveries)) state.deliveries = [];
         saveState();
         render();
       }
 
       function endInnings() {
-        if (!state || state.inningsEnded) return;
+        if (!state || state.inningsEnded || state.matchEnded) return;
         pushHistory();
         state.inningsEnded = true;
         if (state.innings === 2) finishSecondInnings();
@@ -320,7 +463,7 @@
 
       function startSecondInnings() {
         if (!state || state.innings !== 1 || !state.inningsEnded) return;
-        pushHistory();
+
         state.firstInningsRuns = state.runs;
         state.target = state.runs + 1;
         state.innings = 2;
@@ -330,12 +473,20 @@
         state.inningsEnded = false;
         state.matchEnded = false;
         state.resultText = '';
+        state.deliveries = [];
+        // Each innings has its own Undo history.
+        state.history = [];
+
         saveState();
         render();
       }
 
       function newMatch() {
-        if (state && !state.matchEnded && !confirm('Start a new match? The current score will be cleared.')) return;
+        if (state && !state.matchEnded &&
+            !confirm('Start a new match? The current score will be cleared.')) {
+          return;
+        }
+
         state = null;
         saveState();
         $('scoreScreen').hidden = true;
@@ -350,6 +501,55 @@
           button.classList.toggle('selected', selected);
           button.setAttribute('aria-pressed', selected ? 'true' : 'false');
         });
+      }
+
+      function renderBallHistory() {
+        const container = $('ballHistoryContent');
+        const deliveries = Array.isArray(state.deliveries) ? state.deliveries : [];
+        container.replaceChildren();
+
+        if (deliveries.length === 0) {
+          const empty = document.createElement('div');
+          empty.className = 'ball-history-empty';
+          empty.textContent = 'Ball results will appear here as you score.';
+          container.appendChild(empty);
+          return;
+        }
+
+        const overs = new Map();
+        deliveries.forEach((delivery) => {
+          const overNumber = Number(delivery.over) || 1;
+          if (!overs.has(overNumber)) overs.set(overNumber, []);
+          overs.get(overNumber).push(delivery);
+        });
+
+        for (const [overNumber, balls] of overs) {
+          const row = document.createElement('div');
+          row.className = 'over-row';
+
+          const label = document.createElement('div');
+          label.className = 'over-label';
+          label.textContent = `OVER ${overNumber}`;
+          row.appendChild(label);
+
+          const chips = document.createElement('div');
+          chips.className = 'ball-chips';
+
+          balls.forEach((delivery) => {
+            const chip = document.createElement('span');
+            chip.className = `ball-chip ${delivery.kind || 'normal'}`;
+            chip.textContent = delivery.label;
+            chip.title = delivery.description || delivery.label;
+            chip.setAttribute('aria-label', delivery.description || delivery.label);
+            chips.appendChild(chip);
+          });
+
+          row.appendChild(chips);
+          container.appendChild(row);
+        }
+
+        // Scroll to the most recent over as new entries arrive.
+        container.scrollTop = container.scrollHeight;
       }
 
       function render() {
@@ -368,33 +568,65 @@
         $('neededBlock').hidden = !chasing;
         $('targetBlock').hidden = !chasing;
         $('targetLine').style.display = chasing ? 'block' : 'none';
+
         if (chasing) {
+          const runsNeeded = Math.max(0, state.target - state.runs);
+          const ballsRemaining = Math.max(0, state.oversLimit * 6 - state.balls);
           $('target').textContent = state.target;
-          $('needed').textContent = Math.max(0, state.target - state.runs);
-          $('targetLine').innerHTML = `Target <strong>${state.target}</strong> &nbsp;·&nbsp; <strong>${Math.max(0, state.target - state.runs)}</strong> to win`;
+          $('needed').textContent = runsNeeded;
+          $('targetLine').replaceChildren();
+
+          const targetText = document.createElement('span');
+          targetText.textContent = 'Target ';
+          const targetValue = document.createElement('strong');
+          targetValue.textContent = state.target;
+          const divider = document.createElement('span');
+          divider.textContent = ' · ';
+          const runsValue = document.createElement('strong');
+          runsValue.textContent = runsNeeded;
+          const runsText = document.createElement('span');
+          runsText.textContent = ' to win off ';
+          const ballsValue = document.createElement('strong');
+          ballsValue.textContent = ballsRemaining;
+          const ballsText = document.createElement('span');
+          ballsText.textContent = ballsRemaining === 1 ? ' ball' : ' balls';
+
+          $('targetLine').append(
+            targetText, targetValue, divider, runsValue, runsText, ballsValue, ballsText
+          );
         }
+
+        renderBallHistory();
 
         const completed = state.inningsEnded || state.matchEnded;
         $('scoringControls').style.display = completed ? 'none' : 'block';
         $('stateBanner').style.display = completed ? 'block' : 'none';
         $('nextActions').style.display = completed ? 'block' : 'none';
+
         if (completed) {
           if (state.matchEnded) {
-            $('stateBanner').textContent = `${state.resultText} · FINAL SCORE ${state.runs}/${state.wickets}`;
-            $('nextBtn').textContent = 'START NEW MATCH  →';
-            $('nextBtn').onclick = newMatch;
+            $('stateBanner').textContent =
+              `${state.resultText} · FINAL SCORE ${state.runs}/${state.wickets}`;
+            $('nextBtn').textContent = 'START NEW MATCH →';
             $('newMatchBtn').hidden = true;
           } else {
-            $('stateBanner').textContent = `INNINGS COMPLETE · ${state.runs}/${state.wickets} IN ${oversText(state.balls)} OVERS`;
-            $('nextBtn').textContent = 'START 2ND INNINGS  →';
-            $('nextBtn').onclick = startSecondInnings;
+            $('stateBanner').textContent =
+              `INNINGS COMPLETE · ${state.runs}/${state.wickets} IN ${oversText(state.balls)} OVERS`;
+            $('nextBtn').textContent = 'START 2ND INNINGS →';
             $('newMatchBtn').hidden = false;
           }
         }
-        $('undoBtn').disabled = state.history.length === 0;
+
+        // There is only one Undo visible at a time:
+        // the keypad button while scoring, or this button when an innings ends.
+        $('completedUndoBtn').disabled = !state.history.length;
+
         document.querySelectorAll('[data-action]').forEach((button) => {
-          if (button.dataset.action === 'undo') button.disabled = state.history.length === 0;
-          else button.disabled = completed;
+          if (button.dataset.action === 'undo') {
+            button.disabled = !state.history.length;
+          } else {
+            button.disabled = completed;
+          }
         });
       }
 
@@ -404,18 +636,61 @@
           updateOversSelection();
         });
       });
+
+      function openNoBallModal() {
+        if (!state || state.inningsEnded || state.matchEnded) return;
+        $('noBallModal').hidden = false;
+        const firstOption = document.querySelector('[data-no-ball-runs="0"]');
+        if (firstOption) firstOption.focus();
+      }
+
+      function closeNoBallModal(returnFocus = true) {
+        $('noBallModal').hidden = true;
+        if (returnFocus) {
+          const noBallButton = document.querySelector('[data-action="noball"]');
+          if (noBallButton) noBallButton.focus();
+        }
+      }
+
       $('startBtn').addEventListener('click', startMatch);
       document.querySelectorAll('[data-action]').forEach((button) => {
-        button.addEventListener('click', () => applyAction(button.dataset.action, Number(button.dataset.value || 0)));
+        button.addEventListener('click', () => {
+          if (button.dataset.action === 'noball') {
+            openNoBallModal();
+            return;
+          }
+          applyAction(button.dataset.action, Number(button.dataset.value || 0));
+        });
       });
-      $('undoBtn').addEventListener('click', undo);
+
+      document.querySelectorAll('[data-no-ball-runs]').forEach((button) => {
+        button.addEventListener('click', () => {
+          const additionalRuns = Number(button.dataset.noBallRuns);
+          closeNoBallModal(false);
+          applyAction('noball', additionalRuns);
+        });
+      });
+
+      $('cancelNoBall').addEventListener('click', () => closeNoBallModal());
+      $('noBallModal').addEventListener('click', (event) => {
+        if (event.target === $('noBallModal')) closeNoBallModal();
+      });
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !$('noBallModal').hidden) closeNoBallModal();
+      });
+
       $('endInningsBtn').addEventListener('click', endInnings);
-      $('nextBtn').addEventListener('click', startSecondInnings);
+      $('completedUndoBtn').addEventListener('click', undo);
+      $('nextBtn').addEventListener('click', () => {
+        if (state && state.matchEnded) newMatch();
+        else startSecondInnings();
+      });
       $('newMatchBtn').addEventListener('click', newMatch);
 
-      if (state && !Array.isArray(state.history)) state.history = [];
       if (state) {
         selectedOvers = Number(state.oversLimit) || 6;
+        if (!Array.isArray(state.history)) state.history = [];
+        if (!Array.isArray(state.deliveries)) state.deliveries = [];
         render();
       } else {
         updateOversSelection();
