@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#10291f" />
+  <title>Quick Cricket Score</title>
+  <style>
+    :root {
+      --bg: #0b1712;
+      --panel: #13271e;
+      --panel-2: #1a3528;
+      --line: rgba(255,255,255,.1);
+      --text: #f4f7f4;
+      --muted: #a9bbb0;
+      --green: #b9f36b;
+      --green-dark: #233f2c;
+      --orange: #ffb454;
+      --red: #ff7777;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(ellipse at top, #1a3527 0%, var(--bg) 58%);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+    }
+    button, input { font: inherit; }
+    button { -webkit-tap-highlight-color: transparent; cursor: pointer; }
+    .app { width: 100%; max-width: 470px; }
+    .brand { text-align: center; margin-bottom: 18px; }
+    .brand-mark {
+      display: inline-grid; place-items: center; width: 42px; height: 42px;
+      border-radius: 14px; background: var(--green); color: #102016; font-size: 23px;
+      box-shadow: 0 8px 28px rgba(185,243,107,.14); margin-bottom: 9px;
+    }
+    .brand h1 { margin: 0; letter-spacing: .12em; font-size: 17px; font-weight: 850; }
+    .brand p { margin: 5px 0 0; color: var(--muted); font-size: 12px; }
+    .panel {
+      background: linear-gradient(155deg, rgba(25,51,38,.98), rgba(15,32,24,.98));
+      border: 1px solid var(--line); border-radius: 25px; overflow: hidden;
+      box-shadow: 0 22px 70px rgba(0,0,0,.28);
+    }
+    .setup { padding: 27px 24px 24px; }
+    .eyebrow { color: var(--green); font-size: 10px; letter-spacing: .16em; font-weight: 850; text-transform: uppercase; }
+    h2 { font-size: 25px; line-height: 1.15; margin: 9px 0 7px; letter-spacing: -.035em; }
+    .subtext { color: var(--muted); font-size: 13px; line-height: 1.55; margin: 0 0 24px; }
+    .overs-label { display: block; color: #dbe8de; font-size: 12px; font-weight: 750; margin-bottom: 9px; }
+    .overs-picker { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-bottom: 23px; }
+    .overs-choice {
+      background: rgba(255,255,255,.045); border: 1px solid var(--line); color: var(--text);
+      padding: 11px 0; border-radius: 11px; font-weight: 800; transition: .15s ease;
+    }
+    .overs-choice.selected { background: var(--green); border-color: var(--green); color: #102016; }
+    .primary {
+      width: 100%; border: 0; background: var(--green); color: #102016; border-radius: 13px;
+      padding: 15px 18px; font-weight: 900; font-size: 14px; letter-spacing: .015em;
+      box-shadow: 0 7px 20px rgba(185,243,107,.12); transition: transform .12s ease, filter .12s ease;
+    }
+    .primary:active, .score-btn:active, .utility:active { transform: scale(.97); }
+    .score-top { padding: 19px 21px 0; }
+    .innings-line { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .innings-pill { color: var(--green); background: rgba(185,243,107,.09); border: 1px solid rgba(185,243,107,.2); border-radius: 99px; padding: 7px 10px; font-size: 10px; font-weight: 850; letter-spacing: .09em; text-transform: uppercase; }
+    .overs-limit { color: var(--muted); font-size: 11px; font-weight: 650; }
+    .score-area { text-align: center; padding: 25px 10px 21px; }
+    .score-number { font-size: clamp(66px, 19vw, 88px); line-height: .98; font-weight: 900; letter-spacing: -.075em; font-variant-numeric: tabular-nums; }
+    .score-number .slash { font-size: .45em; font-weight: 550; color: #98ab9d; letter-spacing: -.02em; vertical-align: 16%; margin: 0 3px; }
+    .score-caption { color: #bdcfc2; font-size: 10px; font-weight: 850; letter-spacing: .2em; margin-top: 12px; }
+    .score-meta { display: flex; justify-content: center; align-items: center; gap: 13px; margin-top: 16px; }
+    .meta-block { min-width: 86px; }
+    .meta-label { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: .1em; }
+    .meta-value { font-weight: 800; font-size: 20px; margin-top: 4px; font-variant-numeric: tabular-nums; }
+    .meta-divider { width: 1px; height: 32px; background: var(--line); }
+    .target-line { display: none; text-align: center; padding: 10px 14px; background: rgba(185,243,107,.07); border-top: 1px solid rgba(185,243,107,.11); color: #d9e7dc; font-size: 12px; }
+    .target-line strong { color: var(--green); }
+    .state-banner { display: none; margin: 0 18px 16px; border-radius: 12px; padding: 12px; text-align: center; background: rgba(255,180,84,.1); border: 1px solid rgba(255,180,84,.25); color: #ffd8a6; font-size: 12px; font-weight: 800; line-height: 1.4; }
+    .controls { padding: 0 17px 18px; }
+    .section-label { color: var(--muted); font-size: 10px; font-weight: 850; letter-spacing: .14em; text-transform: uppercase; margin: 0 0 10px 3px; }
+    .run-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 9px; }
+    .score-btn {
+      min-height: 58px; border-radius: 14px; border: 1px solid var(--line); background: rgba(255,255,255,.055);
+      color: var(--text); font-size: 19px; font-weight: 850; transition: transform .1s ease, background .12s ease;
+    }
+    .score-btn .small { display: block; color: var(--muted); font-size: 9px; font-weight: 700; letter-spacing: .03em; margin-top: 3px; }
+    .score-btn.boundary { color: var(--green); background: rgba(185,243,107,.08); border-color: rgba(185,243,107,.2); }
+    .score-btn.wicket { color: #ff9a9a; background: rgba(255,119,119,.09); border-color: rgba(255,119,119,.23); font-size: 13px; }
+    .score-btn.extra { color: var(--orange); background: rgba(255,180,84,.08); border-color: rgba(255,180,84,.24); font-size: 12px; }
+    .score-btn:disabled { opacity: .32; cursor: not-allowed; transform: none; }
+    .extra-note { color: #84988b; font-size: 10px; line-height: 1.4; margin: 9px 2px 0; }
+    .utility-row { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 15px; }
+    .utility { border: 1px solid var(--line); color: #d8e4db; border-radius: 11px; padding: 11px 9px; font-size: 11px; font-weight: 800; background: rgba(255,255,255,.025); }
+    .utility:disabled { opacity: .35; cursor: not-allowed; }
+    .next-actions { display: none; padding: 0 18px 19px; }
+    .secondary { width: 100%; margin-top: 8px; border: 1px solid var(--line); background: rgba(255,255,255,.04); color: var(--text); padding: 12px; border-radius: 12px; font-weight: 800; font-size: 12px; }
+    .footnote { text-align: center; color: #71867a; font-size: 10px; margin: 13px 0 0; }
+    [hidden] { display: none !important; }
+    @media (max-width: 360px) {
+      body { padding: 10px; }
+      .setup { padding: 22px 18px; }
+      .score-top { padding-left: 16px; padding-right: 16px; }
+      .controls { padding-left: 12px; padding-right: 12px; }
+      .run-grid { gap: 7px; }
+      .score-btn { min-height: 54px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="brand">
+      <div class="brand-mark" aria-hidden="true">🏏</div>
+      <h1>QUICK CRICKET</h1>
+      <p>Just tap. Keep playing.</p>
+    </header>
+
+    <section class="panel" id="setupScreen">
+      <div class="setup">
+        <div class="eyebrow">New match</div>
+        <h2>How many overs?</h2>
+        <p class="subtext">Choose the innings length. No player names, team names, or bowler details needed.</p>
+        <span class="overs-label">OVERS PER INNINGS</span>
+        <div class="overs-picker" id="oversPicker" role="group" aria-label="Overs per innings">
+          <button class="overs-choice" data-overs="1">1</button>
+          <button class="overs-choice" data-overs="2">2</button>
+          <button class="overs-choice" data-overs="3">3</button>
+          <button class="overs-choice" data-overs="4">4</button>
+          <button class="overs-choice" data-overs="5">5</button>
+          <button class="overs-choice selected" data-overs="6">6</button>
+          <button class="overs-choice" data-overs="7">7</button>
+          <button class="overs-choice" data-overs="8">8</button>
+          <button class="overs-choice" data-overs="9">9</button>
+          <button class="overs-choice" data-overs="10">10</button>
+          <button class="overs-choice" data-overs="12">12</button>
+          <button class="overs-choice" data-overs="15">15</button>
+        </div>
+        <button class="primary" id="startBtn">START MATCH&nbsp; →</button>
+      </div>
+    </section>
+
+    <section class="panel" id="scoreScreen" hidden>
+      <div class="score-top">
+        <div class="innings-line">
+          <span class="innings-pill" id="inningsPill">1st innings</span>
+          <span class="overs-limit" id="oversLimit">6 overs</span>
+        </div>
+      </div>
+      <div class="score-area" aria-live="polite">
+        <div class="score-number"><span id="runs">0</span><span class="slash">/</span><span id="wickets">0</span></div>
+        <div class="score-caption">TOTAL SCORE</div>
+        <div class="score-meta">
+          <div class="meta-block">
+            <div class="meta-label">Overs</div>
+            <div class="meta-value" id="overs">0.0</div>
+          </div>
+          <div class="meta-divider"></div>
+          <div class="meta-block" id="neededBlock" hidden>
+            <div class="meta-label">To win</div>
+            <div class="meta-value" id="needed">0</div>
+          </div>
+          <div class="meta-block" id="targetBlock" hidden>
+            <div class="meta-label">Target</div>
+            <div class="meta-value" id="target">1</div>
+          </div>
+        </div>
+      </div>
+      <div class="target-line" id="targetLine"></div>
+      <div class="state-banner" id="stateBanner"></div>
+
+      <div class="controls" id="scoringControls">
+        <div class="section-label">Runs off the ball</div>
+        <div class="run-grid">
+          <button class="score-btn" data-action="dot">•<span class="small">DOT</span></button>
+          <button class="score-btn" data-action="run" data-value="1">1</button>
+          <button class="score-btn" data-action="run" data-value="2">2</button>
+          <button class="score-btn" data-action="run" data-value="3">3</button>
+          <button class="score-btn boundary" data-action="run" data-value="4">4<span class="small">FOUR</span></button>
+          <button class="score-btn" data-action="run" data-value="5">5</button>
+          <button class="score-btn boundary" data-action="run" data-value="6">6<span class="small">SIX</span></button>
+          <button class="score-btn wicket" data-action="wicket">WICKET<span class="small">OUT</span></button>
+          <button class="score-btn extra" data-action="wide">WD<span class="small">+1 · NOT A BALL</span></button>
+          <button class="score-btn extra" data-action="noball">NB<span class="small">+1 · NOT A BALL</span></button>
+          <button class="score-btn extra" data-action="extra">+1<span class="small">EXTRA RUN</span></button>
+          <button class="score-btn" data-action="undo">↶<span class="small">UNDO</span></button>
+        </div>
+        <p class="extra-note">For extra running runs on a wide or no-ball, tap “+1 Extra Run” once per run. It does not use up a ball.</p>
+        <div class="utility-row">
+          <button class="utility" id="undoBtn">↶ &nbsp; Undo last action</button>
+          <button class="utility" id="endInningsBtn">End innings</button>
+        </div>
+      </div>
+      <div class="next-actions" id="nextActions">
+        <button class="primary" id="nextBtn">START 2ND INNINGS&nbsp; →</button>
+        <button class="secondary" id="newMatchBtn">Start a new match</button>
+      </div>
+    </section>
+    <p class="footnote">Your score is saved on this device automatically.</p>
+  </main>
+
+  <script>
+    (() => {
+      const STORAGE_KEY = 'quickCricketScore_v1';
+      const $ = (id) => document.getElementById(id);
+      let selectedOvers = 6;
+      let state = loadState();
+
+      function loadState() {
+        try {
+          const saved = localStorage.getItem(STORAGE_KEY);
+          return saved ? JSON.parse(saved) : null;
+        } catch (_) { return null; }
+      }
+
+      function saveState() {
+        try {
+          if (state) localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+          else localStorage.removeItem(STORAGE_KEY);
+        } catch (_) { /* The app still works if browser storage is unavailable. */ }
+      }
+
+      function snapshot() {
+        const { history, ...rest } = state;
+        return JSON.parse(JSON.stringify(rest));
+      }
+
+      function pushHistory() {
+        state.history.push(snapshot());
+        if (state.history.length > 100) state.history.shift();
+      }
+
+      function startMatch() {
+        state = {
+          oversLimit: selectedOvers,
+          innings: 1,
+          runs: 0,
+          wickets: 0,
+          balls: 0,
+          target: null,
+          firstInningsRuns: null,
+          inningsEnded: false,
+          matchEnded: false,
+          resultText: '',
+          history: []
+        };
+        saveState();
+        render();
+      }
+
+      function oversText(balls) {
+        return `${Math.floor(balls / 6)}.${balls % 6}`;
+      }
+
+      function finishSecondInnings() {
+        state.matchEnded = true;
+        state.inningsEnded = true;
+        if (state.runs >= state.target) {
+          state.resultText = 'TARGET REACHED';
+        } else if (state.runs === state.firstInningsRuns) {
+          state.resultText = 'MATCH TIED';
+        } else if (state.runs > state.firstInningsRuns) {
+          state.resultText = 'SECOND INNINGS WINS';
+        } else {
+          state.resultText = 'FIRST INNINGS WINS';
+        }
+      }
+
+      function checkInningsEnd() {
+        if (state.innings === 2 && state.runs >= state.target) {
+          finishSecondInnings();
+          return;
+        }
+        if (state.balls >= state.oversLimit * 6 || state.wickets >= 10) {
+          state.inningsEnded = true;
+          if (state.innings === 2) finishSecondInnings();
+        }
+      }
+
+      function applyAction(action, value = 0) {
+        if (!state || state.inningsEnded || state.matchEnded) return;
+        if (action === 'undo') return undo();
+        if (action === 'wicket' && state.wickets >= 10) return;
+        pushHistory();
+
+        if (action === 'dot') state.balls += 1;
+        if (action === 'run') {
+          state.runs += value;
+          state.balls += 1;
+        }
+        if (action === 'wicket') {
+          state.wickets += 1;
+          state.balls += 1;
+        }
+        if (action === 'wide' || action === 'noball' || action === 'extra') state.runs += 1;
+
+        checkInningsEnd();
+        saveState();
+        render();
+      }
+
+      function undo() {
+        if (!state || !state.history.length) return;
+        const history = state.history;
+        const previous = history.pop();
+        state = { ...previous, history };
+        saveState();
+        render();
+      }
+
+      function endInnings() {
+        if (!state || state.inningsEnded) return;
+        pushHistory();
+        state.inningsEnded = true;
+        if (state.innings === 2) finishSecondInnings();
+        saveState();
+        render();
+      }
+
+      function startSecondInnings() {
+        if (!state || state.innings !== 1 || !state.inningsEnded) return;
+        pushHistory();
+        state.firstInningsRuns = state.runs;
+        state.target = state.runs + 1;
+        state.innings = 2;
+        state.runs = 0;
+        state.wickets = 0;
+        state.balls = 0;
+        state.inningsEnded = false;
+        state.matchEnded = false;
+        state.resultText = '';
+        saveState();
+        render();
+      }
+
+      function newMatch() {
+        if (state && !state.matchEnded && !confirm('Start a new match? The current score will be cleared.')) return;
+        state = null;
+        saveState();
+        $('scoreScreen').hidden = true;
+        $('setupScreen').hidden = false;
+        selectedOvers = 6;
+        updateOversSelection();
+      }
+
+      function updateOversSelection() {
+        document.querySelectorAll('.overs-choice').forEach((button) => {
+          const selected = Number(button.dataset.overs) === selectedOvers;
+          button.classList.toggle('selected', selected);
+          button.setAttribute('aria-pressed', selected ? 'true' : 'false');
+        });
+      }
+
+      function render() {
+        const isSetup = !state;
+        $('setupScreen').hidden = !isSetup;
+        $('scoreScreen').hidden = isSetup;
+        if (isSetup) return;
+
+        $('inningsPill').textContent = state.innings === 1 ? '1st innings' : '2nd innings';
+        $('oversLimit').textContent = `${state.oversLimit} ${state.oversLimit === 1 ? 'over' : 'overs'}`;
+        $('runs').textContent = state.runs;
+        $('wickets').textContent = state.wickets;
+        $('overs').textContent = oversText(state.balls);
+
+        const chasing = state.innings === 2;
+        $('neededBlock').hidden = !chasing;
+        $('targetBlock').hidden = !chasing;
+        $('targetLine').style.display = chasing ? 'block' : 'none';
+        if (chasing) {
+          $('target').textContent = state.target;
+          $('needed').textContent = Math.max(0, state.target - state.runs);
+          $('targetLine').innerHTML = `Target <strong>${state.target}</strong> &nbsp;·&nbsp; <strong>${Math.max(0, state.target - state.runs)}</strong> to win`;
+        }
+
+        const completed = state.inningsEnded || state.matchEnded;
+        $('scoringControls').style.display = completed ? 'none' : 'block';
+        $('stateBanner').style.display = completed ? 'block' : 'none';
+        $('nextActions').style.display = completed ? 'block' : 'none';
+        if (completed) {
+          if (state.matchEnded) {
+            $('stateBanner').textContent = `${state.resultText} · FINAL SCORE ${state.runs}/${state.wickets}`;
+            $('nextBtn').textContent = 'START NEW MATCH  →';
+            $('nextBtn').onclick = newMatch;
+            $('newMatchBtn').hidden = true;
+          } else {
+            $('stateBanner').textContent = `INNINGS COMPLETE · ${state.runs}/${state.wickets} IN ${oversText(state.balls)} OVERS`;
+            $('nextBtn').textContent = 'START 2ND INNINGS  →';
+            $('nextBtn').onclick = startSecondInnings;
+            $('newMatchBtn').hidden = false;
+          }
+        }
+        $('undoBtn').disabled = state.history.length === 0;
+        document.querySelectorAll('[data-action]').forEach((button) => {
+          if (button.dataset.action === 'undo') button.disabled = state.history.length === 0;
+          else button.disabled = completed;
+        });
+      }
+
+      document.querySelectorAll('.overs-choice').forEach((button) => {
+        button.addEventListener('click', () => {
+          selectedOvers = Number(button.dataset.overs);
+          updateOversSelection();
+        });
+      });
+      $('startBtn').addEventListener('click', startMatch);
+      document.querySelectorAll('[data-action]').forEach((button) => {
+        button.addEventListener('click', () => applyAction(button.dataset.action, Number(button.dataset.value || 0)));
+      });
+      $('undoBtn').addEventListener('click', undo);
+      $('endInningsBtn').addEventListener('click', endInnings);
+      $('nextBtn').addEventListener('click', startSecondInnings);
+      $('newMatchBtn').addEventListener('click', newMatch);
+
+      if (state && !Array.isArray(state.history)) state.history = [];
+      if (state) {
+        selectedOvers = Number(state.oversLimit) || 6;
+        render();
+      } else {
+        updateOversSelection();
+        render();
+      }
+    })();
+  </script>
+</body>
+</html>
